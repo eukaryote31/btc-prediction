@@ -15,8 +15,9 @@ datafile = 'bitcoin-historical-price/bitstampUSD_1-min_data_2012-01-01_to_2017-1
 
 # Load historical price data
 data = np.genfromtxt(datafile, delimiter=',')
-data = data[:1000000]
+data = data[:1500000]
 print "Data loaded"
+
 
 # Number of candles to consider in input
 INPUT_LENGTH = 60 * 1
@@ -27,7 +28,8 @@ TRAIN_EXISTING = False
 x_train = []
 y_train = []
 
-indicators = [indicators.ema(12), indicators.ema(26), indicators.ema(65), indicators.ema(200)]
+indicators = [indicators.ema(12), indicators.ema(26), indicators.ema(65), indicators.ema(200),
+              indicators.rsi(14)]
 ind_data = []
 for ind in indicators:
     ind_data.append(ind(data))
@@ -39,7 +41,7 @@ for i in range(len(data) - INPUT_LENGTH - 1):
     x_train.append(
         np.append(data[i:i + INPUT_LENGTH, 1:6], ind_data_sw[i:i + INPUT_LENGTH, :], axis=1))
 
-    y_train.append(data[i + INPUT_LENGTH, 1:6])
+    y_train.append(data[i + INPUT_LENGTH, 1:5])
 print "Data sliced into x & y"
 
 # cut off first 1000 so that indicators that don't start at candle 0 are continuous
@@ -69,10 +71,10 @@ else:
     model.add(LeakyReLU(0.1))
     model.add(Flatten())
     model.add(Dense(32))
-    model.add(Dense(5))
+    model.add(Dense(4))
 
 model.compile(optimizer=Adam(), loss='mse', metrics=['mae'])
-model.fit(x_train, y_train, batch_size=2048, epochs=1)
+model.fit(x_train, y_train, batch_size=2048, epochs=3)
 model.save('model-btc.h5')
 
 print model.evaluate(x_test, y_test)
