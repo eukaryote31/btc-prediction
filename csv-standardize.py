@@ -37,8 +37,7 @@ def combine(data, size):
     ret = []
     for i in range(0, len(data), size):
         u = data[i:i + size]
-        ret.append(
-            u[0, 0], max(u[:, 1]), min(u[:, 2]), u[-1, 3], sum(u[:, 4]))
+        ret.append((u[0, 0], max(u[:, 1]), min(u[:, 2]), u[-1, 3], sum(u[:, 4])))
 
     return np.array(ret)
 
