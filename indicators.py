@@ -1,9 +1,10 @@
 import numpy as np
+import math
 
 
 def ema(length):
     def ema_fn(data):
-        return _ema(data[:, 4], length)
+        return _ema(data[:, 3], length)
 
     return ema_fn
 
@@ -14,7 +15,7 @@ def rsi(length):
         d = []
 
         prev = 0
-        for n in data[:, 4]:
+        for n in data[:, 3]:
             diff = n - prev
             if diff > 0:
                 u.append(diff)
@@ -33,6 +34,18 @@ def rsi(length):
         return np.append([None for i in range(length)], (100 - (100 / (1 + rs))))
 
     return rsi_fn
+
+
+def accdistdelt():
+    def accdistdelt_fn(data):
+        """ ((close - low) - (high - close)) / (high - low) """
+        mfm = (np.float64((data[:, 3] - data[:, 2]) - (data[:, 1] - data[:, 3])) / (data[:, 1] - data[:, 2]))
+
+        mfv = mfm * data[:, 4]
+
+        return np.nan_to_num(mfv)
+
+    return accdistdelt_fn
 
 
 def _ema(arr, length):
