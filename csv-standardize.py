@@ -3,32 +3,47 @@ import sys
 
 import indicators
 
-CANDLE_SIZE = 15
+CANDLE_SIZE = 10
 
 
 def main():
     print "Loadng from txt"
-    data = np.genfromtxt(sys.argv[1], delimiter=',', skip_header=2, usecols=[1, 2, 3, 4, 6])
+    idata = np.genfromtxt(sys.argv[1], delimiter=',', skip_header=2, usecols=[1, 2, 3, 4, 6])
 
-    print "Merging candles"
-    data = combine(data, CANDLE_SIZE)
+    i = 0
+    res = None
+    candle_sizes = [15, 60]
+    for candle_size in candle_sizes:
+        for offset in range(0, candle_size, 2):
+            # offset data for less overfitting
+            data = idata[offset:]
 
-    print "Applying indicators"
-    inds = [indicators.ema(12), indicators.ema(26), indicators.ema(65), indicators.ema(200),
-            indicators.rsi(14), indicators.accdistdelt()]
+            print "Merging candles"
+            data = combine(data, candle_size)
 
-    ind_data = []
-    for ind in inds:
-        ind_data.append(ind(data))
+            if len(data) < 500:
+                break
 
-    print "Swapping axes"
-    ind_data_sw = np.swapaxes(ind_data, 0, 1)
+            print "Applying indicators"
+            inds = [indicators.ema(12), indicators.ema(26), indicators.ema(65), indicators.ema(200),
+                    indicators.rsi(14), indicators.accdistdelt()]
 
-    data = np.append(data, ind_data_sw, axis=1)
-    data = data[500:]
+            ind_data = []
+            for ind in inds:
+                ind_data.append(ind(data))
+
+
+            print "Swapping axes"
+            ind_data_sw = np.swapaxes(ind_data, 0, 1)
+            print "length", len(ind_data_sw)
+
+            data = np.append(data, ind_data_sw, axis=1)
+            data = data[500:]
+            np.savetxt('data{}.csv'.format(i), data, delimiter=',')
+            i += 1
+
 
     print "Saving"
-    np.savetxt('data.csv', data, delimiter=',')
 
 
 def combine(data, size):

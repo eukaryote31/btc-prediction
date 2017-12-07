@@ -9,6 +9,13 @@ def ema(length):
     return ema_fn
 
 
+def sma(length):
+    def sma_fn(data):
+        return _sma(data[:, 3], length)
+
+    return sma_fn
+
+
 def rsi(length):
     def rsi_fn(data):
         u = []
@@ -39,13 +46,21 @@ def rsi(length):
 def accdistdelt():
     def accdistdelt_fn(data):
         """ ((close - low) - (high - close)) / (high - low) """
-        mfm = (np.float64((data[:, 3] - data[:, 2]) - (data[:, 1] - data[:, 3])) / (data[:, 1] - data[:, 2]))
+        mfm = (np.float64((data[:, 3] - data[:, 2]) - (
+            data[:, 1] - data[:, 3])) / (data[:, 1] - data[:, 2]))
 
         mfv = mfm * data[:, 4]
 
         return np.nan_to_num(mfv)
 
     return accdistdelt_fn
+
+
+def _sma(arr, length):
+    av = [None for i in range(length)]
+    for i in range(length, len(arr)):
+        av.append(np.average(arr[i - length:i]))
+    return np.array(av)
 
 
 def _ema(arr, length):
