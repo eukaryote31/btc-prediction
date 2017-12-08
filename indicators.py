@@ -16,6 +16,14 @@ def sma(length):
     return sma_fn
 
 
+def macd(lena, lenb):
+    def macd_fn(data):
+        length = max(lena, lenb)
+        return np.append([None for i in range(length)], _ema(data[:, 3], lena)[length:] - _ema(data[:, 3], lenb)[length:])
+
+    return macd_fn
+
+
 def rsi(length):
     def rsi_fn(data):
         u = []
