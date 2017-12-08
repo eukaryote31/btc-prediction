@@ -5,6 +5,13 @@ import indicators
 
 CANDLE_SIZE = 10
 
+inds = [indicators.ema(5), indicators.ema(10), indicators.ema(50), indicators.ema(100), indicators.ema(200),
+        indicators.sma(20), indicators.sma(50),
+        indicators.rsi(14),
+        indicators.macd(12, 26),
+        indicators.accdistdelt(),
+        indicators.ichimoku_tenkan(), indicators.ichimoku_kijun()
+        ]
 
 def main():
     print "Loadng from txt"
@@ -25,8 +32,6 @@ def main():
                 break
 
             print "Applying indicators"
-            inds = [indicators.ema(12), indicators.ema(26), indicators.ema(65), indicators.ema(200),
-                    indicators.rsi(14), indicators.accdistdelt()]
 
             ind_data = []
             for ind in inds:
@@ -39,7 +44,7 @@ def main():
 
             data = np.append(data, ind_data_sw, axis=1)
             data = data[500:]
-            np.savetxt('data{}.csv'.format(i), data, delimiter=',')
+            np.savetxt('bitcoin-historical-price/data{}.csv'.format(i), data, delimiter=',')
             i += 1
 
 
