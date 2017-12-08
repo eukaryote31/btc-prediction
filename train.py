@@ -12,24 +12,20 @@ import numpy as np
 import keras.backend as K
 import tensorflow as tf
 
-
 import os
 import sys
 
 import indicators
+from csv_standardize import inds
 
 # Number of candles to consider in input
 INPUT_LENGTH = 25
 
-TESTING_SIZE = 100
+TESTING_SIZE = 10000
 TRAIN_EXISTING = True
-
-inds = [indicators.ema(12), indicators.ema(26), indicators.ema(65), indicators.ema(200),
-        indicators.sma(50), indicators.rsi(14), indicators.accdistdelt()]
 
 
 SIGN_PENALTY = 250.
-
 
 def conv_net():
     inputs = Input(shape=(INPUT_LENGTH, 5 + len(inds)))
@@ -44,8 +40,6 @@ def conv_net():
     l = Activation('relu')(l)
     l = Flatten()(l)
 
-    l = Dense(16)(l)
-    l = Activation('relu')(l)
     predictions = Dense(1)(l)
     return Model(inputs=inputs, outputs=predictions)
 
@@ -94,10 +88,11 @@ def main(argv):
         data = np.genfromtxt(datafile, delimiter=',')
         print "Data loaded"
 
-        for i in range(len(data) - INPUT_LENGTH - 1):
+        LOOKAHEAD = 1
+        for i in range(len(data) - INPUT_LENGTH - LOOKAHEAD):
             x_train.append(data[i:i + INPUT_LENGTH, :])
 
-            y_train.append(data[i + INPUT_LENGTH + 1, 3] - data[i + INPUT_LENGTH, 3])
+            y_train.append(data[i + INPUT_LENGTH + LOOKAHEAD, 3] - data[i + INPUT_LENGTH, 3])
         print "Data sliced into x & y"
 
     # OHLCV
@@ -116,7 +111,7 @@ def main(argv):
 
     print "Processed data:", len(x_train)
 
-    model.fit(x_train, y_train, batch_size=8192, epochs=1, validation_split=0.1)
+    model.fit(x_train, y_train, batch_size=8192, epochs=100, validation_split=0.1)
     model.save('model-btc.h5')
 
     print model.evaluate(x_test, y_test)
