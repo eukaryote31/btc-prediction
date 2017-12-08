@@ -64,6 +64,24 @@ def accdistdelt():
     return accdistdelt_fn
 
 
+def ichimoku_tenkan(length=9):
+    def ichimoku_tenkan_fn(data):
+        av = [None for i in range(length)]
+        for i in range(length, len(data)):
+            av.append((max(data[i - length:i, 1]) + min(data[i - length:i, 2])) / 2)
+        return np.array(av)
+    return ichimoku_tenkan_fn
+
+
+def ichimoku_kijun(length=26):
+    def ichimoku_kijun_fn(data):
+        av = [None for i in range(length)]
+        for i in range(length, len(data)):
+            av.append((max(data[i - length:i, 1]) + min(data[i - length:i, 2])) / 2)
+        return np.array(av)
+    return ichimoku_kijun_fn
+
+
 def _sma(arr, length):
     av = [None for i in range(length)]
     for i in range(length, len(arr)):
